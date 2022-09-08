@@ -81,7 +81,7 @@ module.exports = {
 			const { limit, page, order_by, sort } = req.query;
 			let offset = page * limit - limit;
 			db.query(
-				`SELECT post.post_id,post.profile_id, post.post_cover,post.post_title,post.post_category,post.post_fill, post_statistic.like_count,post_statistic.comment_count 
+				`SELECT post.post_id,post.profile_id, post.post_cover,post.post_title,post.post_category,post.post_fill, post_statistic.like_count,post_statistic.comment_count, post.created_at
 				from post JOIN post_statistic on post.post_id = post_statistic.post_id
 				 where post_status = 'accepted' ORDER BY ${order_by} ${sort} limit ${limit} OFFSET ${offset} `,
 				(error, result) => {
@@ -104,11 +104,13 @@ module.exports = {
 										resolve({
 											message: 'Get All Accepted Post Success',
 											status: 200,
-											totalpage: totalpage,
 											totalRow: result.length,
 											totaldata: result2.length,
 											list: {
-												post: result,
+												post: {
+													result,
+													totalpage: totalpage,
+												},
 												comment: resultcomment,
 											},
 										});
@@ -389,8 +391,7 @@ module.exports = {
 			const { post_id } = req.query;
 
 			db.query(
-				`SELECT post.post_id,post.profile_id, post.post_cover,post.post_title,post.post_category,post.post_fill, post_statistic.like_count,post_statistic.comment_count from post JOIN post_statistic on post.post_id = post_statistic.post_id
-				 where post_status = 'accepted' AND post.post_id='${post_id}' `,
+				`SELECT post.post_id,post.profile_id,post.post_cover,post.post_title,post.post_category,post.post_fill,post_statistic.like_count,post_statistic.comment_count from post JOIN post_statistic on post.post_id = post_statistic.post_id where post_status = 'accepted' AND post.post_id='${post_id}'`,
 				(error, result) => {
 					console.log(result[0], 'ini resultnya');
 					db.query(
@@ -403,7 +404,7 @@ module.exports = {
 								});
 							} else {
 								db.query(
-									`select post_comment.post_id, post_comment.profile_id, profiles.profile_name,post_comment.comment_message from post_comment INNER JOIN profiles On post_comment.profile_id = profiles.profile_id WHERE post_comment.post_id='${post_id}'`,
+									`select post_comment.post_id,post_comment.profile_id,profiles.profile_name,post_comment.comment_message from post_comment INNER JOIN profiles On post_comment.profile_id = profiles.profile_id WHERE post_comment post_id='${post_id}'`,
 									(errcomment, resultcomment) => {
 										db.query(
 											`Select profile_name from profiles where profile_id = '${result[0].profile_id}'`,

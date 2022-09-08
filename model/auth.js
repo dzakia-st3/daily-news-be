@@ -12,6 +12,7 @@ module.exports = {
 	login: (req, res) => {
 		return new Promise((resolve, reject) => {
 			const { email, password } = req.body;
+			console.log('halooo')
 			db.query(
 				`SELECT account_id, account_password, account_role FROM account  WHERE account_email='${email.toLowerCase()}'`,
 				(err, results) => {
